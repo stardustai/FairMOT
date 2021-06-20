@@ -3,7 +3,7 @@ opencv-python
 PyYAML
 cython-bbox
 scipy
-numba
+# numba
 progress
 motmetrics
 matplotlib
@@ -12,3 +12,4 @@ openpyxl
 Pillow
 tensorboardX
 fvcore
+torch

@@ -1,1 +1,5 @@
 .idea
+*.pth
+llvmlite/
+__pycache__/
+input/
