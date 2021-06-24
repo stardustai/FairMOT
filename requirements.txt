@@ -3,7 +3,7 @@ opencv-python
 PyYAML
 cython-bbox
 scipy
-# numba
+numba
 progress
 motmetrics
 matplotlib

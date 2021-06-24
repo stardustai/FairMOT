@@ -3,3 +3,12 @@
 llvmlite/
 __pycache__/
 input/
+kitti_tracking/images/
+kitti_tracking/KITTI/
+kitti_tracking/labels_with_ids/
+kitti_tracking/original_label/
+kitti_tracking/train/
+kitti_tracking/devkit/
+output/
+.vscode
+*.pyc
