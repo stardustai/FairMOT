@@ -7,7 +7,7 @@ import torch
 from progress.bar import Bar
 from models.data_parallel import DataParallel
 from utils.utils import AverageMeter
-
+from tqdm import tqdm
 
 class ModleWithLoss(torch.nn.Module):
   def __init__(self, model, loss):
@@ -59,7 +59,7 @@ class BaseTrainer(object):
     num_iters = len(data_loader) if opt.num_iters < 0 else opt.num_iters
     bar = Bar('{}/{}'.format(opt.task, opt.exp_id), max=num_iters)
     end = time.time()
-    for iter_id, batch in enumerate(data_loader):
+    for iter_id, batch in tqdm(enumerate(data_loader)):
       if iter_id >= num_iters:
         break
       data_time.update(time.time() - end)

@@ -65,6 +65,7 @@ def main(opt):
             model, opt.load_model, trainer.optimizer, opt.resume, opt.lr, opt.lr_step)
 
     for epoch in range(start_epoch + 1, opt.num_epochs + 1):
+        print(f'Train on epoch: {epoch}')
         mark = epoch if opt.save_all else 'last'
         log_dict_train, _ = trainer.train(epoch, train_loader)
         logger.write('epoch: {} |'.format(epoch))
