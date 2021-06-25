@@ -5,10 +5,12 @@ from __future__ import print_function
 import argparse
 import os
 import sys
+from box import Box
 
 class opts(object):
   def __init__(self):
     self.parser = argparse.ArgumentParser()
+
     # basic experiment setting
     self.parser.add_argument('--task', default='mot', help='mot')
     self.parser.add_argument('--dataset', default='jde', help='jde')
@@ -16,7 +18,7 @@ class opts(object):
     self.parser.add_argument('--test', action='store_true')
     #self.parser.add_argument('--load_model', default='../models/ctdet_coco_dla_2x.pth',
                              #help='path to pretrained model')
-    self.parser.add_argument('--load_model', default='',
+    self.parser.add_argument('--load_model', default='models/fairmot_dla34.pth',
                              help='path to pretrained model')
     self.parser.add_argument('--resume', action='store_true',
                              help='resume an experiment. '
@@ -26,6 +28,7 @@ class opts(object):
 
     # system
     self.parser.add_argument('--gpus', default='-1',#default='2, 3',
+    # self.parser.add_argument('--gpus', default='0',
                              help='-1 for CPU, use comma for multiple gpus')
     self.parser.add_argument('--num_workers', type=int, default=8,
                              help='dataloader threads. 0 for single-thread.')
@@ -159,9 +162,76 @@ class opts(object):
     self.parser.add_argument('--not_reg_offset', action='store_true',
                              help='not regress local offset.')
 
+
+  # def get_args(self):
+  #   args = Box()
+  #   args.task = 'mot'
+  #   args.dataset = 'jde'
+  #   args.exp_id = 'default'
+  #   args.test = True
+  #   args.load_model = 'models/fairmot_dla34.pth'
+  #   args.resume = True
+  #   args.gpus = '0'
+  #   args.num_workers = 8
+  #   args.not_cuda_benchmark = True
+  #   args.seed = 317
+  #   args.print_iter = 0
+  #   args.hide_data_time = True
+  #   args.save_all = True
+  #   args.metric = 'loss'
+  #   args.vis_thresh = 0.5
+  #   args.arch = 'dla_34'
+  #   args.head_conv = -1
+  #   args.down_ratio = 4
+  #   args.input_res = -1
+  #   args.input_h = -1
+  #   args.input_w = -1
+  #   args.lr = 1e-4
+  #   args.lr_step = '20'
+  #   args.num_epochs = 30
+  #   args.batch_size = -1
+  #   args.master_batch_size = -1
+  #   args.num_iters = -1
+  #   args.val_intervals = 5
+  #   args.trainval = True
+  #   args.K = 500
+  #   args.not_prefetch_test = True
+  #   args.fix_res = True
+  #   args.keep_res = True
+  #   args.test_mot16 = False
+  #   args.conf_thres = 0.4
+  #   args.det_thres = 0.3
+  #   args.nms_thres = 0.4
+  #   args.track_buffer = 30
+  #   args.min_box_area = 100
+  #   args.input_video = 'videos/LAOPshort_00-07-5F-C3-3D-44_210304100000-210304100200.video.mp4'
+  #   args.output_format = 'video'
+  #   args.output_root = 'output'
+  #   args.data_cfg = 'src/lib/cfg/data.json'
+  #   args.data_dir = 'dataset/'
+  #   args.mse_loss = True
+  #   args.reg_loss = 'l1'
+  #   args.hm_weight = 1
+  #   args.off_weight = 1
+  #   args.wh_weight = 0.1
+  #   args.id_loss = 'ce'
+  #   args.id_weight = 1
+  #   args.reid_dim = 128
+  #   args.ltrb = True
+  #   args.multi_loss = 'uncertainty'
+  #   args.norm_wh = True
+  #   args.dense_wh = True
+  #   args.cat_spec_wh = True
+  #   args.not_reg_offset = True
+  #   self.parser = args
+  #   return args
+
+
   def parse(self, args=''):
     if args == '':
       opt = self.parser.parse_args()
+    elif type(args) is Box:
+      opt = args
     else:
       opt = self.parser.parse_args(args)
 
@@ -245,6 +315,8 @@ class opts(object):
         for k, v in entries.items():
           self.__setattr__(k, v)
     opt = self.parse(args)
+    # opt = self.get_args()
+    # self.parse(opt)
     dataset = Struct(default_dataset_info[opt.task])
     opt.dataset = dataset.dataset
     opt = self.update_dataset_info_and_set_heads(opt, dataset)

@@ -31,16 +31,19 @@ def demo(opt):
              use_cuda=opt.gpus!=[-1])
 
     if opt.output_format == 'video':
-        output_video_path = osp.join(result_root, 'results.mp4')
-        cmd_str = 'ffmpeg -f image2 -i {}/%05d.jpg -b 5000k -c:v mpeg4 {}'.format(osp.join(result_root, 'frame'), output_video_path)
+        filename = opt.input_video.split('/')[-1].split('.')
+        filename = filename[0]+'_result.'+filename[-1]
+        output_video_path = osp.join(result_root, filename)
+        cmd_str = f'ffmpeg -f image2 -i {osp.join(result_root, "frame")}/%05d.jpg -c:v libx265 -preset fast -x265-params crf=30 -tag:v hvc1 -vf fps={frame_rate} {output_video_path}'
         os.system(cmd_str)
 
 
 if __name__ == '__main__':
-    # os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+    os.environ['CUDA_VISIBLE_DEVICES'] = '0'
     opt = opts().init()
     opt.load_model = 'models/fairmot_dla34.pth'
     opt.device = 'cpu'
     opt.input_video = 'videos/video_10s.mp4'
     opt.show_image = True
+    opt.output_root = 'output'
     demo(opt)
