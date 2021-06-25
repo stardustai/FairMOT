@@ -10,7 +10,7 @@ class opts(object):
   def __init__(self):
     self.parser = argparse.ArgumentParser()
     # basic experiment setting
-    self.parser.add_argument('task', default='mot', help='mot')
+    self.parser.add_argument('--task', default='mot', help='mot')
     self.parser.add_argument('--dataset', default='jde', help='jde')
     self.parser.add_argument('--exp_id', default='default')
     self.parser.add_argument('--test', action='store_true')
@@ -25,7 +25,7 @@ class opts(object):
                                   'in the exp dir if load_model is empty.') 
 
     # system
-    self.parser.add_argument('--gpus', default='2, 3',
+    self.parser.add_argument('--gpus', default='-1',#default='2, 3',
                              help='-1 for CPU, use comma for multiple gpus')
     self.parser.add_argument('--num_workers', type=int, default=8,
                              help='dataloader threads. 0 for single-thread.')
@@ -118,7 +118,7 @@ class opts(object):
                              default='../videos/MOT16-03.mp4',
                              help='path to the input video')
     self.parser.add_argument('--output-format', type=str, default='video', help='video or text')
-    self.parser.add_argument('--output-root', type=str, default='../demos', help='expected output root path')
+    self.parser.add_argument('--output-root', type=str, default='demos', help='expected output root path')
 
     # mot
     self.parser.add_argument('--data_cfg', type=str,
