@@ -1,0 +1,15 @@
+{
+    "root":"",
+    "train":
+    {
+        "kitti_tracking":"kitti_tracking/kitti_tracking.train"
+    },
+    "test_emb":
+    {
+        "kitti_tracking": "kitti_tracking/kitti_tracking.val"
+    },
+    "test":
+    {
+        
+    }
+}

@@ -18,7 +18,7 @@ class opts(object):
     self.parser.add_argument('--test', action='store_true')
     #self.parser.add_argument('--load_model', default='../models/ctdet_coco_dla_2x.pth',
                              #help='path to pretrained model')
-    self.parser.add_argument('--load_model', default='models/fairmot_dla34.pth',
+    self.parser.add_argument('--load_model', default='',
                              help='path to pretrained model')
     self.parser.add_argument('--resume', action='store_true',
                              help='resume an experiment. '
@@ -29,7 +29,7 @@ class opts(object):
     # system
     self.parser.add_argument('--gpus', default='0',
                              help='-1 for CPU, use comma for multiple gpus')
-    self.parser.add_argument('--num_workers', type=int, default=8,
+    self.parser.add_argument('--num_workers', type=int, default=0,
                              help='dataloader threads. 0 for single-thread.')
     self.parser.add_argument('--not_cuda_benchmark', action='store_true',
                              help='disable when the input size is not fixed.')
@@ -229,8 +229,6 @@ class opts(object):
   def parse(self, args=''):
     if args == '':
       opt = self.parser.parse_args()
-    elif type(args) is Box:
-      opt = args
     else:
       opt = self.parser.parse_args(args)
 
@@ -303,11 +301,11 @@ class opts(object):
     print('heads', opt.heads)
     return opt
 
-  def init(self, args=''):
+  def init(self, args='', num_classes = 1):
     default_dataset_info = {
-      'mot': {'default_resolution': [608, 1088], 'num_classes': 1,
+        'mot': {'default_resolution': [608, 1088], 'num_classes': num_classes,
                 'mean': [0.408, 0.447, 0.470], 'std': [0.289, 0.274, 0.278],
-                'dataset': 'jde', 'nID': 14455},
+                'dataset': 'jde', 'nID': 5867},
     }
     class Struct:
       def __init__(self, entries):

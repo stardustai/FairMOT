@@ -41,7 +41,9 @@ def demo(opt):
 
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-    opt = opts().init()
+    opt = opts().init(num_classes = 80)
+    # opt = opts().init()
+    opt.load_model = 'models/fairmot_dla34.pth' #'models/ctdet_coco_dla_2x.pth'
     opt.input_video = 'videos/LAOPshort_00-07-5F-C3-3D-44_210304100000-210304100200.video.mp4'
     opt.output_root = 'output'
     demo(opt)

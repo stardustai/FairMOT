@@ -97,4 +97,8 @@ if __name__ == '__main__':
     opt = opts().parse()
     opt.exp_id = 'kitti'
     opt.data_dir = 'kitti_tracking'
+    opt.data_cfg = 'src/lib/cfg/kitti.json'
+    opt.load_model = 'models/ctdet_coco_dla_2x.pth'
+    opt.num_classes = 10
+    # opt.nID = 5867
     main(opt)

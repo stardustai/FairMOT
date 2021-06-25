@@ -56,7 +56,7 @@ The field [identity] is an integer from 0 to num_identities - 1, or -1 if this b
     '''
 
 data_root = 'kitti_tracking'
-ori_img_path = data_root+'/train'
+ori_img_path = data_root+'/tracking_images/training/image_02'
 target_img_path = data_root+'/images'
 target_txt_path = data_root+'/labels_with_ids'
 ori_label_path = data_root+'/original_label/label_02'
@@ -69,10 +69,18 @@ class_ID = {
     'Cyclist': 6, 
     'Tram': 7,
     'Misc': 8,
-    'DontCare': 9
+    'DontCare': 9,
+    'Person': 4
 }
-os.makedirs(target_txt_path, exist_ok=True)
-os.makedirs(target_img_path, exist_ok=True)
+
+# def get_class_ID(name):
+#     if name in class_ID:
+#         return class_ID[name]
+#     else:
+#         max_id = max(class_ID.values())
+#         class_ID[name] = max_id + 1
+#         print(f'added class `{name}` to dict with value {max_id+1}')
+#         return class_ID[name]
 
 def convert_kitti():
     tasks = glob(ori_img_path+'/*')
@@ -81,6 +89,8 @@ def convert_kitti():
 
     for task in tasks:
         print(f'Processing task: {task}')
+        os.makedirs(f'{target_txt_path}/{task}', exist_ok=True)
+        os.makedirs(f'{target_img_path}/{task}', exist_ok=True)
         label_file = glob(f'{ori_label_path}/{task}.txt')[0]
         
         label_df = pd.read_csv(label_file, names=['frame', 'track_id', 'type', 'truncated', 
@@ -97,13 +107,15 @@ def convert_kitti():
         label_df['class'] = label_df.type.apply(lambda x: class_ID[x])
         frames = set(label_df.frame.to_list())
         for f in tqdm(frames):
-            txt_path = f'{target_txt_path}/{f:06}.txt'
-            img_path = f'{target_img_path}/{f:06}.jpg'
-            img = Image.open(f'{ori_img_path}/{task}/{f:06}.png')
-            assert w == img.width and h == img.height
-            img.save(img_path)
-            txt_df = label_df.query('frame == @f')[['class', 'track_id', 'x_center', 'y_center', 'w_p', 'h_p']]
-            txt_df.to_csv(txt_path, header=False, index=False, sep=' ')
+            txt_path = f'{target_txt_path}/{task}/{f:06}.txt'
+            img_path = f'{target_img_path}/{task}/{f:06}.jpg'
+            if not os.path.exists(img_path):
+                img = Image.open(f'{ori_img_path}/{task}/{f:06}.png')
+                assert w == img.width and h == img.height
+                img.save(img_path)
+            if not os.path.exists(txt_path):
+                txt_df = label_df.query('frame == @f')[['class', 'track_id', 'x_center', 'y_center', 'w_p', 'h_p']]
+                txt_df.to_csv(txt_path, header=False, index=False, sep=' ')
 
 
 # validate generated annotation file
@@ -118,18 +130,38 @@ def render_img(img_path, txt):
     anno['y2'] = (anno.y_center + anno.h_p/2) * h
     for i, row in anno.iterrows():
         draw.rectangle([(row.x1, row.y1), (row.x2, row.y2)])
-        img.show(title='anno')
+    img.show(title='anno')
+
 
 def show_rand_img():
-    imgs = glob(target_img_path+'/*.jpg')
-    # imgs = [t.split('/')[-1] for t in imgs]
+    imgs = glob(target_img_path+'/**/*.jpg', recursive=True)
     img = random.choice(imgs)
     frame = img.split('/')[-1].split('.')[0]
     print(f'ploting task: {frame}')
-    txt = glob(f'{target_txt_path}/{frame}.txt')[0]
+    txt = img.replace('images', 'labels_with_ids').replace('.jpg', '.txt')
     render_img(img, txt)
-    time.sleep(10)
+
+def gen_train_val():
+    tasks = glob(target_img_path+'/*')
+    tasks = [t.split('/')[-1] for t in tasks]
+    #split train val
+    train_set = tasks[:int(len(tasks)*0.8)]
+    val_set = tasks[int(len(tasks)*0.8):]
+
+    with open(f'{data_root}/{data_root}.train', 'w') as f:
+        for task in train_set:
+            images = glob(f'{target_img_path}/{task}/*.jpg')
+            for t in images:
+                f.write(t+'\n')
+
+    with open(f'{data_root}/{data_root}.val', 'w') as f:
+        for task in val_set:
+            images = glob(f'{target_img_path}/{task}/*.jpg')
+            for t in images:
+                f.write(t+'\n')
+
 
 if __name__ == '__main__':
     # convert_kitti()
+    # gen_train_val()
     show_rand_img()
