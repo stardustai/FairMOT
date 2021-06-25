@@ -3,7 +3,6 @@ from __future__ import division
 from __future__ import print_function
 
 import _init_paths
-
 import logging
 import os
 import os.path as osp
@@ -28,7 +27,7 @@ def demo(opt):
 
     frame_dir = None if opt.output_format == 'text' else osp.join(result_root, 'frame')
     eval_seq(opt, dataloader, 'mot', result_filename,
-             save_dir=frame_dir, show_image=False, frame_rate=frame_rate,
+             save_dir=frame_dir, show_image=opt.show_image, frame_rate=frame_rate,
              use_cuda=opt.gpus!=[-1])
 
     if opt.output_format == 'video':
@@ -41,9 +40,10 @@ def demo(opt):
 
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-    opt = opts().init(num_classes = 80)
-    # opt = opts().init()
-    opt.load_model = 'models/fairmot_dla34.pth' #'models/ctdet_coco_dla_2x.pth'
-    opt.input_video = 'videos/LAOPshort_00-07-5F-C3-3D-44_210304100000-210304100200.video.mp4'
+    opt = opts().init()
+    opt.load_model = 'models/fairmot_dla34.pth'
+    # opt.device = 'cpu'
+    opt.input_video = 'videos/video_10s.mp4'
+    opt.show_image = True
     opt.output_root = 'output'
     demo(opt)
