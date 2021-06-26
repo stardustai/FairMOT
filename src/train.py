@@ -95,11 +95,14 @@ def main(opt):
 
 if __name__ == '__main__':
     torch.cuda.set_device(0)
-    opt = opts().parse()
-    opt.exp_id = 'kitti'
-    opt.data_dir = 'kitti_tracking'
-    opt.data_cfg = 'src/lib/cfg/kitti.json'
-    opt.load_model = 'models/ctdet_coco_dla_2x.pth'
-    opt.num_classes = 10
-    # opt.nID = 5867
+    opt = opts().parse(
+        [
+            '--exp_id', 'kitti',
+            '--data_dir', 'kitti_tracking',
+            '--data_cfg', 'src/lib/cfg/kitti.json',
+            '--load_model', 'models/ctdet_coco_dla_2x.pth',
+            '--num_classes', '10',
+            '--ltrb', False,
+            '--batch_size', 24
+    ])
     main(opt)
