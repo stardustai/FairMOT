@@ -13,4 +13,5 @@ kitti_tracking/devkit/
 output/
 .vscode/
 *.pyc
+videos/
 exp/

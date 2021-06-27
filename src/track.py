@@ -94,7 +94,8 @@ def eval_seq(opt, dataloader, data_type, result_filename, save_dir=None, show_im
         for t in online_targets:
             tlwh = t.tlwh
             tid = t.track_id
-            vertical = tlwh[2] / tlwh[3] > 1.6
+            # We filter the objects (only for person) when w is 1.6 times larger than h in track.py.
+            vertical = True # tlwh[2] / tlwh[3] > 1.6
             if tlwh[2] * tlwh[3] > opt.min_box_area and not vertical:
                 online_tlwhs.append(tlwh)
                 online_ids.append(tid)
