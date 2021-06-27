@@ -121,7 +121,7 @@ class opts(object):
                              default='../videos/MOT16-03.mp4',
                              help='path to the input video')
     self.parser.add_argument('--output-format', type=str, default='video', help='video or text')
-    self.parser.add_argument('--output-root', type=str, default='demos', help='expected output root path')
+    self.parser.add_argument('--output-root', type=str, default='output', help='expected output root path')
 
     # mot
     self.parser.add_argument('--data_cfg', type=str,
@@ -250,8 +250,6 @@ class opts(object):
         for k, v in entries.items():
           self.__setattr__(k, v)
     opt = self.parse(args)
-    # opt = self.get_args()
-    # self.parse(opt)
     dataset = Struct(default_dataset_info[opt.task])
     opt.dataset = dataset.dataset
     opt = self.update_dataset_info_and_set_heads(opt, dataset)

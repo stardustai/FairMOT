@@ -41,9 +41,14 @@ def demo(opt):
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
     opt = opts().init()
-    opt.load_model = 'models/fairmot_dla34.pth'
-    # opt.device = 'cpu'
+    opt = opts().init(
+        [
+            '--data_cfg', 'src/lib/cfg/kitti.json',
+            '--load_model', 'exp/mot/kitti/model_last.pth',
+            '--num_classes', '10',
+            '--ltrb', False
+    ], num_classes=10)
     opt.input_video = 'videos/video_10s.mp4'
-    opt.show_image = True
     opt.output_root = 'output'
+    opt.show_image = False
     demo(opt)

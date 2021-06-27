@@ -223,6 +223,8 @@ class JDETracker(object):
             for j in range(1, self.opt.num_classes + 1):
                 keep_inds = (results[j][:, 4] >= thresh)
                 results[j] = results[j][keep_inds]
+
+        results = np.concatenate([np.concatenate([det, np.ones((det.shape[0],1))*c], axis=1) for c, det in results.items()], axis=0)
         return results
 
     def update(self, im_blob, img0):
@@ -245,20 +247,19 @@ class JDETracker(object):
         ''' Step 1: Network forward, get detections & embeddings'''
         with torch.no_grad():
             output = self.model(im_blob)[-1]
-            hm = output['hm'].sigmoid_()  # [1, 1, 152, 272]
-            wh = output['wh']  # [1, 4, 152, 272]
+            hm = output['hm'].sigmoid_()  # [1, 10, 152, 272]
+            wh = output['wh']  # [1, 2, 152, 272]
             id_feature = output['id']  # [1, 128, 152, 272]
-            id_feature = F.normalize(id_feature, dim=1)  # [1, 2, 152, 272]
+            id_feature = F.normalize(id_feature, dim=1)
 
-            reg = output['reg'] if self.opt.reg_offset else None
-            # [1, 500, 6], [1, 500]
-            dets, inds = mot_decode(hm, wh, reg=reg, ltrb=self.opt.ltrb, K=self.opt.K)
-            id_feature = _tranpose_and_gather_feat(id_feature, inds)
-            id_feature = id_feature.squeeze(0)  # [500, 128]
+            reg = output['reg'] if self.opt.reg_offset else None #[1, 2, 152, 272]
+            dets, inds = mot_decode(hm, wh, reg=reg, ltrb=self.opt.ltrb, K=self.opt.K) #[1, 500, 6], [1, 500]
+            id_feature = _tranpose_and_gather_feat(id_feature, inds) #[1, 500, 128] 
+            id_feature = id_feature.squeeze(0)
             id_feature = id_feature.cpu().numpy()
 
         dets = self.post_process(dets, meta)
-        dets = self.merge_outputs([dets])[1]  # (500, 5)
+        dets = self.merge_outputs([dets])#[1]
 
         remain_inds = dets[:, 4] > self.opt.conf_thres
         dets = dets[remain_inds]
