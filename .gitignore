@@ -10,8 +10,11 @@ kitti_tracking/labels_with_ids/
 kitti_tracking/original_label/
 kitti_tracking/train/
 kitti_tracking/devkit/
+kitti_tracking/rendered/
 output/
 .vscode/
 *.pyc
 videos/
 exp/
+kitti_tracking/KITTI
+kitti_tracking/tracking_images
