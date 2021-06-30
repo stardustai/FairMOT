@@ -129,13 +129,13 @@ class opts(object):
             '--track_buffer', type=int, default=150, help='tracking buffer, ReID frame length')
         self.parser.add_argument(
             '--min-box-area', type=float, default=100, help='filter out tiny boxes')
-        self.parser.add_argument('--input-video', type=str,
+        self.parser.add_argument('--input_video', type=str,
                                  default='../videos/MOT16-03.mp4',
                                  help='path to the input video')
         self.parser.add_argument(
             '--output-format', type=str, default='video', help='video or text')
         self.parser.add_argument(
-            '--output-root', type=str, default='output', help='expected output root path')
+            '--output_root', type=str, default='output', help='expected output root path')
 
         # mot
         self.parser.add_argument('--data_cfg', type=str,
@@ -176,7 +176,9 @@ class opts(object):
                                  help='category specific bounding box size.')
         self.parser.add_argument('--not_reg_offset', action='store_true',
                                  help='not regress local offset.')
-        self.parser.add_argument('--num_classes', type=int, default=1)
+        self.parser.add_argument('--num_classes', type=int, default=-1)
+        self.parser.add_argument('--track_duration', type=int, default=5)
+        self.parser.add_argument('--show_image', action='store_true')
 
     def parse(self, args=''):
         if args == '':
@@ -226,7 +228,7 @@ class opts(object):
     def update_dataset_info_and_set_heads(self, opt, dataset):
         input_h, input_w = dataset.default_resolution
         # opt.mean, opt.std = dataset.mean, dataset.std
-        opt.num_classes = dataset.num_classes
+        opt.num_classes = dataset.num_classes if opt.num_classes < 0 else opt.num_classes
 
         # input_h(w): opt.input_h overrides opt.input_res overrides dataset default
         input_h = opt.input_res if opt.input_res > 0 else input_h
@@ -263,7 +265,7 @@ class opts(object):
             },
             'kitti': {
                 'default_resolution': [608, 1088], 'num_classes': 6,
-                'mean': [0.408, 0.447, 0.470], 'std': [0.289, 0.274, 0.278],
+                # 'mean': [0.408, 0.447, 0.470], 'std': [0.289, 0.274, 0.278],
                 'dataset': 'jde', 'nID': 135
             }
         }
@@ -275,6 +277,11 @@ class opts(object):
         dataset = Struct(default_dataset_info[opt.dataset])
         # opt.dataset = dataset.dataset
         opt = self.update_dataset_info_and_set_heads(opt, dataset)
+
+        #output
+        filename = opt.input_video.split('/')[-1].replace('.mp4', '_result.mp4')
+        opt.result_file = f"{opt.output_root}/{filename.replace('.mp4', '.txt')}"
+        opt.output_video_path = f"{opt.output_root}/{filename}"
         return opt
 
 a, b = 1080, 1920
