@@ -24,14 +24,14 @@ from models.utils import _tranpose_and_gather_feat
 
 class STrack(BaseTrack):
     shared_kalman = KalmanFilter()
-    def __init__(self, tlwh, score, temp_feat, buffer_size=30):
+    def __init__(self, tlwh, score, temp_feat, buffer_size=30, class_=None):
 
         # wait activate
         self._tlwh = np.asarray(tlwh, dtype=np.float)
         self.kalman_filter = None
         self.mean, self.covariance = None, None
         self.is_activated = False
-
+        self.class_ = class_
         self.score = score
         self.tracklet_len = 0
 
@@ -169,7 +169,7 @@ class STrack(BaseTrack):
         return ret
 
     def __repr__(self):
-        return 'OT_{}_({}-{})'.format(self.track_id, self.start_frame, self.end_frame)
+        return f'OT: {self.track_id}[{self.class_}]_({self.start_frame}-{self.end_frame})'
 
 
 class JDETracker(object):
@@ -194,8 +194,8 @@ class JDETracker(object):
         self.buffer_size = int(frame_rate / 30.0 * opt.track_buffer)
         self.max_time_lost = self.buffer_size
         self.max_per_image = opt.K
-        self.mean = np.array(opt.mean, dtype=np.float32).reshape(1, 1, 3)
-        self.std = np.array(opt.std, dtype=np.float32).reshape(1, 1, 3)
+        # self.mean = np.array(opt.mean, dtype=np.float32).reshape(1, 1, 3)
+        # self.std = np.array(opt.std, dtype=np.float32).reshape(1, 1, 3)
 
         self.kalman_filter = KalmanFilter()
 
@@ -279,8 +279,9 @@ class JDETracker(object):
 
         if len(dets) > 0:
             '''Detections'''
-            detections = [STrack(STrack.tlbr_to_tlwh(tlbrs[:4]), tlbrs[4], f, 30) for
-                          (tlbrs, f) in zip(dets[:, :5], id_feature)]
+            detections = [STrack(STrack.tlbr_to_tlwh(tlbrs[:4]), tlbrs[4], f, 30, class_=tlbrs[5]) for
+                          (tlbrs, f) in zip(dets, id_feature)]
+            # print(f'Got {len(detections)} detections')
         else:
             detections = []
 
@@ -303,23 +304,25 @@ class JDETracker(object):
         #dists = matching.iou_distance(strack_pool, detections)
         dists = matching.fuse_motion(self.kalman_filter, dists, strack_pool, detections)
         matches, u_track, u_detection = matching.linear_assignment(dists, thresh=0.4)
-
+        # print(f'Embedding matched: {len(matches)}, u_detection: {len(u_detection)}')
+        
         for itracked, idet in matches:
             track = strack_pool[itracked]
             det = detections[idet]
             if track.state == TrackState.Tracked:
                 track.update(detections[idet], self.frame_id)
                 activated_starcks.append(track)
+
             else:
                 track.re_activate(det, self.frame_id, new_id=False)
                 refind_stracks.append(track)
 
-        ''' Step 3: Second association, with IOU'''
+        ''' Step 3: Second association for undetected, with IOU'''
         detections = [detections[i] for i in u_detection]
         r_tracked_stracks = [strack_pool[i] for i in u_track if strack_pool[i].state == TrackState.Tracked]
         dists = matching.iou_distance(r_tracked_stracks, detections)
         matches, u_track, u_detection = matching.linear_assignment(dists, thresh=0.5)
-
+        # print(f'IoU matched: {len(matches)}, u_detection: {len(u_detection)}')
         for itracked, idet in matches:
             track = r_tracked_stracks[itracked]
             det = detections[idet]
@@ -340,6 +343,7 @@ class JDETracker(object):
         detections = [detections[i] for i in u_detection]
         dists = matching.iou_distance(unconfirmed, detections)
         matches, u_unconfirmed, u_detection = matching.linear_assignment(dists, thresh=0.7)
+        # print(f'Embedding matched: {len(matches)}, u_unconfirmed: {len(u_unconfirmed)}, u_detection: {len(u_detection)}')
         for itracked, idet in matches:
             unconfirmed[itracked].update(detections[idet], self.frame_id)
             activated_starcks.append(unconfirmed[itracked])
@@ -355,11 +359,16 @@ class JDETracker(object):
                 continue
             track.activate(self.kalman_filter, self.frame_id)
             activated_starcks.append(track)
+        # print(f'New tracks from u_detection: {len(u_detection)}')
+
         """ Step 5: Update state"""
+        removed = []
         for track in self.lost_stracks:
             if self.frame_id - track.end_frame > self.max_time_lost:
                 track.mark_removed()
                 removed_stracks.append(track)
+                removed.append(track.track_id)
+        # print(f'Removed track: {len(removed)}')
 
         # print('Ramained match {} s'.format(t4-t3))
 

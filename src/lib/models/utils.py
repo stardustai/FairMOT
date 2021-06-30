@@ -10,9 +10,9 @@ def _sigmoid(x):
   return y
 
 def _gather_feat(feat, ind, mask=None):
-    dim  = feat.size(2)
-    ind  = ind.unsqueeze(2).expand(ind.size(0), ind.size(1), dim)
-    feat = feat.gather(1, ind)
+    dim  = feat.size(2) # 128
+    ind  = ind.unsqueeze(2).expand(-1, -1, dim)#[1, 500] -> [1, 500, 128]
+    feat = feat.gather(1, ind)  # [1, 41344, 128] -> [1, 500, 128]
     if mask is not None:
         mask = mask.unsqueeze(2).expand_as(feat)
         feat = feat[mask]
@@ -20,8 +20,8 @@ def _gather_feat(feat, ind, mask=None):
     return feat
 
 def _tranpose_and_gather_feat(feat, ind):
-    feat = feat.permute(0, 2, 3, 1).contiguous()
-    feat = feat.view(feat.size(0), -1, feat.size(3))
+    feat = feat.permute(0, 2, 3, 1).contiguous()  # [1, 128, 152, 272] -> [1, 152, 272, 128]
+    feat = feat.view(feat.size(0), -1, feat.size(3))  # [1, 41344, 128]
     feat = _gather_feat(feat, ind)
     return feat
 

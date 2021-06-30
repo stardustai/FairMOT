@@ -92,12 +92,11 @@ class LoadVideo:  # for inference
         self.vh = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.vn = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
         assert self.vn > 0, 'video is empty'
+        assert img_size[0]%16==0 and img_size[1]%16==0
 
         self.width = img_size[0]
         self.height = img_size[1]
         self.count = 0
-
-        self.w, self.h = 1920, 1080
         print('Lenth of the video: {:d} frames'.format(self.vn))
 
     def get_size(self, vw, vh, dw, dh):
@@ -116,7 +115,7 @@ class LoadVideo:  # for inference
         # Read image
         res, img0 = self.cap.read()  # BGR
         assert img0 is not None, 'Failed to load frame {:d}'.format(self.count)
-        img0 = cv2.resize(img0, (self.w, self.h))
+        # img0 = cv2.resize(img0, (self.w, self.h))
 
         # Padded resize
         img, _, _, _ = letterbox(img0, height=self.height, width=self.width)
@@ -241,8 +240,8 @@ class LoadImagesAndLabels:  # for training
         return self.nF  # number of batches
 
 
-def letterbox(img, height=608, width=1088,
-              color=(127.5, 127.5, 127.5)):  # resize a rectangular image to a padded rectangular
+def letterbox(img, height=608, width=1088, color=(127.5, 127.5, 127.5)):  
+    '''resize a rectangular image to a padded rectangular'''
     shape = img.shape[:2]  # shape = [height, width]
     ratio = min(float(height) / shape[0], float(width) / shape[1])
     new_shape = (round(shape[1] * ratio), round(shape[0] * ratio))  # new_shape = [width, height]

@@ -70,7 +70,7 @@ class BaseTrainer(object):
                 if k != 'meta':
                     batch[k] = batch[k].to(
                         device=opt.device, non_blocking=True)
-
+            # forward
             output, loss, loss_stats = model_with_loss(batch)
             loss = loss.mean()
             if phase == 'train':
