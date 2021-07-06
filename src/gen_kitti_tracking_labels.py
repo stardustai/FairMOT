@@ -69,7 +69,7 @@ class_ID = {
     'Cyclist': 3, 
     'Tram': 4,
     'Misc': 5,
-    # 'DontCare': 6,
+    'DontCare': 6,
     'Person': 3
 }
 ID_class = {v:k for k, v in class_ID.items()}
