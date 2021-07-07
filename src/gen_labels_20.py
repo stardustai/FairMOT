@@ -128,7 +128,7 @@ def render_img(img_path, save_path=None):
 	anno['y2'] = (anno.y_center + anno.h_p/2) * h
 	for i, row in anno.iterrows():
 		c = tuple(colors[int(row.track_id)])
-		draw.rectangle([(row.x1, row.y1), (row.x2, row.y2)], c)
+		draw.rectangle([(row.x1, row.y1), (row.x2, row.y2)], outline=c, width=2)
 		draw.text((row.x1, row.y1), f'{MOT20_ID_class[int(row["class"])]}({row.track_id})', c)
 	if not save_path:
 		return np.asarray(img)
@@ -157,10 +157,10 @@ def render_video():
 			writer.write(img_arr)
 		writer.release()
 
-		cmd_str = f'ffmpeg -y -i {temp_video} -c:v libx264 -preset fast -x264-params crf=25 -vf "crop=trunc(iw/2)*2:trunc(ih/2)*2" -r {fps} {output_video_path}'
-		print(f'>>>Running ffmpeg with cmd: {cmd_str}')
-		os.system(cmd_str)
-		os.remove(temp_video)
+		# cmd_str = f'ffmpeg -y -i {temp_video} -c:v libx264 -preset fast -x264-params crf=25 -vf "crop=trunc(iw/2)*2:trunc(ih/2)*2" -r {fps} {output_video_path}'
+		# print(f'>>>Running ffmpeg with cmd: {cmd_str}')
+		# os.system(cmd_str)
+		# os.remove(temp_video)
 
 if __name__ == '__main__':
 	# convert_mot_to_jde(ori_img_path, target_txt)

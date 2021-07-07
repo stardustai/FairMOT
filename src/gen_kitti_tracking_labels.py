@@ -55,7 +55,7 @@ The field [identity] is an integer from 0 to num_identities - 1, or -1 if this b
     0 -1 DontCare -1 -1 -10.000000 219.310000 188.490000 245.500000 218.560000 -1000.000000 -1000.000000 -1000.000000 -10.000000 -1.000000 -1.000000 -1.000000
     '''
 
-data_root = 'kitti_tracking'
+data_root = 'dataset/kitti_tracking'
 ori_img_path = data_root+'/tracking_images/training/image_02'
 target_img_path = data_root+'/images'
 target_txt_path = data_root+'/labels_with_ids'
@@ -156,13 +156,13 @@ def gen_train_val():
     train_set = tasks[:int(len(tasks)*0.8)]
     val_set = tasks[int(len(tasks)*0.8):]
 
-    with open(f'{data_root}/{data_root}.train', 'w') as f:
+    with open(f'{data_root}/kitti.train', 'w') as f:
         for task in train_set:
             images = glob(f'{target_img_path}/{task}/*.jpg')
             for t in images:
                 f.write(t+'\n')
 
-    with open(f'{data_root}/{data_root}.val', 'w') as f:
+    with open(f'{data_root}/kitti.val', 'w') as f:
         for task in val_set:
             images = glob(f'{target_img_path}/{task}/*.jpg')
             for t in images:
@@ -183,8 +183,8 @@ def render_video():
         os.system(cmd_str)
 
 if __name__ == '__main__':
-    convert_kitti()
+    # convert_kitti()
     gen_train_val()
-    show_img()
-    render_video()
+    # show_img()
+    # render_video()
     

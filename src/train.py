@@ -97,15 +97,27 @@ if __name__ == '__main__':
     torch.cuda.set_device(0)
     opt = opts().parse(
         [
-            '--exp_id', 'kitti_c6',
+            '--exp_id', 'DETRAC_MOT20_KITTI',
             '--data_dir', 'kitti_tracking',
-            '--data_cfg', 'src/lib/cfg/kitti.json',
+            '--data_cfg', 'src/lib/cfg/mot20_kitti_detrac.json',
             '--load_model', 'models/ctdet_coco_dla_2x.pth',
-            '--num_classes', '6',
-            '--ltrb', False,
+            '--num_classes', '8',
+            # '--ltrb', False,
             '--batch_size', '4',
             '--track_buffer', '150',
-            '--dataset', 'kitti'
+            # '--dataset', 'kitti'
             # '--lr', '5e-4'
     ])
+    # train yolo
+    # opt = opts().parse([
+    #     '--exp_id', 'DETRAC_MOT20_KITTI',
+    #     '--data_cfg', 'src/lib/cfg/mot20_kitti_detrac.json',
+    #     '--load_model', 'models/ctdet_coco_dla_2x.pth',
+    #     '--lr', '1e-4',
+    #     '--batch_size', '4',
+    #     '--wh_weight', '0.2',
+    #     '--multi_loss', 'fix',
+    #     '--arch', 'yolo',
+    #     '--reid_dim', '64'
+    # ])
     main(opt)

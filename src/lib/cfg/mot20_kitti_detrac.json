@@ -2,13 +2,13 @@
     "root":"",
     "train":
     {
-        "kitti_tracking":"dataset/kitti_tracking/kitti_tracking.train",
+        "kitti_tracking":"dataset/kitti_tracking/kitti.train",
         "detrac": "dataset/DETRAC/DETRAC.train",
         "mot20": "dataset/MOT20/mot20.train"
     },
     "test_emb":
     {
-        "kitti_tracking": "dataset/kitti_tracking/kitti_tracking.val",
+        "kitti_tracking": "dataset/kitti_tracking/kitti.val",
         "detrac": "dataset/DETRAC/DETRAC.val",
         "mot20": "dataset/MOT20/mot20.val"
     },
