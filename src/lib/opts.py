@@ -264,7 +264,7 @@ class opts(object):
                     'dataset': 'jde', 'nID': 5867
             },
             'kitti': {
-                'default_resolution': [608, 1088], 'num_classes': 6,
+                'default_resolution': [608, 1088], 'num_classes': 8,
                 # 'mean': [0.408, 0.447, 0.470], 'std': [0.289, 0.274, 0.278],
                 'dataset': 'jde', 'nID': 135
             }
@@ -283,12 +283,3 @@ class opts(object):
         opt.result_file = f"{opt.output_root}/{filename.replace('.mp4', '.txt')}"
         opt.output_video_path = f"{opt.output_root}/{filename}"
         return opt
-
-a, b = 1080, 1920
-if a < b:  # 如果a<b，则交换两数位置，否则不交换
-    a, b = b, a
-r = a % b  # 求a/b的余数
-while r != 0:  # 在余数不为零时，始终进行交换和相除
-    a, b = b, r
-    r = a % b
-print(b)
