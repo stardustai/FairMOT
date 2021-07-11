@@ -1,0 +1,1 @@
+rsync -av --progress ~/data/kitti_tracking ~/data/mot20/ ~/data/DETRAC root@8.130.48.199:~/data/

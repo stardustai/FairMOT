@@ -56,7 +56,7 @@ The field [identity] is an integer from 0 to num_identities - 1, or -1 if this b
     '''
 
 data_root = 'dataset/kitti_tracking'
-ori_img_path = data_root+'/tracking_images/training/image_02'
+ori_img_path = data_root+'/images'
 target_img_path = data_root+'/images'
 target_txt_path = data_root+'/labels_with_ids'
 ori_label_path = data_root+'/original_label/label_02'
@@ -83,11 +83,13 @@ def get_class_ID(name):
 
 def convert_kitti():
     # shutil.rmtree(target_img_path)
-    shutil.rmtree(target_txt_path)
+    shutil.rmtree(target_txt_path, ignore_errors=True)
+    os.makedirs(target_txt_path, exist_ok=True)
     tasks = glob(ori_img_path+'/*')
     tasks = [t.split('/')[-1] for t in tasks]
     print(f'Found images for task: {tasks}')
 
+    last_max_tid = 0
     for task in tasks:
         print(f'Processing task: {task}')
         os.makedirs(f'{target_txt_path}/{task}', exist_ok=True)
@@ -98,7 +100,7 @@ def convert_kitti():
             'occluded', 'alpha', 'left', 'top', 'right', 'bottom', 'height', 'width', 'length'
                 'x', 'y', 'z', 'r_y', 'score'], sep=' ')
         #ge img size
-        rand_img = random.choice(glob(f'{ori_img_path}/{task}/*.png'))
+        rand_img = random.choice(glob(f'{ori_img_path}/{task}/*.jpg'))
         img = Image.open(rand_img)
         w, h = img.width, img.height
         label_df['x_center'] = (label_df.left + label_df.right)/2/w
@@ -107,8 +109,13 @@ def convert_kitti():
         label_df['h_p'] = (label_df.bottom - label_df.top)/h
         label_df['class'] = label_df.type.apply(lambda x: get_class_ID(x))
         # drop none class
-        label_df2 = label_df.dropna(how='any')
-        for f in tqdm(range(label_df.frame.max()+1)):
+        # max tid for this seq
+        label_df2 = label_df.dropna(how='any').query('track_id != -1')
+        max_tid = label_df2.track_id.max()+1
+        label_df2.track_id += last_max_tid  # add last_max_tid as base
+        print(f'processing seq: {task} with max tid: {max_tid} starting with base: {last_max_tid}')
+        last_max_tid += max_tid  # for next seq
+        for f in tqdm(range(label_df.frame.max())):
             txt_path = f'{target_txt_path}/{task}/{f:06}.txt'
             img_path = f'{target_img_path}/{task}/{f:06}.jpg'
             if not os.path.exists(img_path):
@@ -169,7 +176,7 @@ def gen_train_val():
                 f.write(t+'\n')
 
 def render_video():
-    rander_path = 'kitti_tracking/rendered'
+    rander_path = 'dataset/kitti_tracking/rendered'
     tasks = glob(target_img_path + '/*')
     for task in tasks:
         seq = task.split('/')[-1]
@@ -181,10 +188,12 @@ def render_video():
         cmd_str = f'ffmpeg -y -framerate 10 -f image2 -i {rander_path}/{seq}/%06d.jpg -c:v libx264 -preset fast -x264-params crf=25 -vf "crop=trunc(iw/2)*2:trunc(ih/2)*2" -r 30 {output_video_path}'
         print(f'>>>Running ffmpeg with cmd: {cmd_str}')
         os.system(cmd_str)
+        import shutil
+        shutil.rmtree(f'{rander_path}/{seq}/')
 
 if __name__ == '__main__':
-    # convert_kitti()
+    convert_kitti()
     gen_train_val()
     # show_img()
-    # render_video()
+    render_video()
     

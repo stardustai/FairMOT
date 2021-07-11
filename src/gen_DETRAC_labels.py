@@ -96,6 +96,7 @@ def convert_cst_to_mot():
 	all_types = all_results.type.value_counts()
 	print(all_types)
 
+	last_max_tid = 0
 	for csv_path in tqdm(all_csv, desc='converting CSV to MOT'):
 		data = pd.read_csv(csv_path)
 		data.type = data.type.apply(lambda x: DETRAC_class_ID[x])
@@ -106,6 +107,12 @@ def convert_cst_to_mot():
 		task = csv_path.split('/')[-1].replace('_v3.csv', '').replace('.csv', '')
 		os.makedirs(f'{target_img_path}/{task}', exist_ok=True)
 		os.makedirs(f'{target_txt_path}/{task}', exist_ok=True)
+		# max tid for this seq
+		data = data.query('id != -1')
+		max_tid = data.id.max()+1
+		data.id += last_max_tid  # add last_max_tid as base
+		print(f'processing seq: {task} with max tid: {max_tid} starting with base: {last_max_tid}')
+		last_max_tid += max_tid  # for next seq
 		for f in range(1, data.frame.max()+1):
 			txt_path = f'{target_txt_path}/{task}/{f:06}.txt'
 			img_path = f'{target_img_path}/{task}/{f:06}.jpg'
@@ -117,8 +124,8 @@ def convert_cst_to_mot():
 				assert width == img.width and height == img.height
 				img.save(img_path)
 			txt_df = data.query('frame == @f')[['type', 'id', 'x_center', 'y_center', 'w_p', 'h_p']]
-			if not os.path.exists(txt_path):
-				txt_df.to_csv(txt_path, header=False, index=False, sep=' ')
+			# if not os.path.exists(txt_path):
+			txt_df.to_csv(txt_path, header=False, index=False, sep=' ')
 
 
 def gen_train_val():
@@ -187,7 +194,7 @@ def render_video():
 		os.remove(temp_video)
 
 if __name__ == '__main__':
-	convert_xml()
-	# convert_cst_to_mot()
+	# convert_xml()
+	convert_cst_to_mot()
 	gen_train_val()
 	render_video()

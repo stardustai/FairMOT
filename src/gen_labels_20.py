@@ -141,7 +141,7 @@ def render_img(img_path, save_path=None):
 		img.save(save_path)
 
 
-def render_video():
+def render_video(target_img_path):
 	tasks = glob(target_img_path + '/*/')
 	for task in tasks:
 		imgs = glob(target_img_path + '/**/*.jpg', recursive=True)

@@ -31,7 +31,7 @@ def main(opt):
 
     transforms = T.Compose([T.ToTensor()])
     dataset = Dataset(opt, dataset_root, trainset_paths, (1088, 608), augment=True, transforms=transforms)
-    opt = opt.update_dataset_info_and_set_heads(opt, dataset)
+    opt = opts().update_dataset_info_and_set_heads(opt, dataset)
     print(opt)
 
     logger = Logger(opt)
@@ -41,7 +41,7 @@ def main(opt):
 
     print('Creating model...')
     model = create_model(opt.arch, opt.heads, opt.head_conv)
-    optimizer = torch.optim.AdamW(model.parameters(), opt.lr, weight_decay=0.01)
+    optimizer = torch.optim.AdamW(model.parameters(), opt.lr)
     start_epoch = 0
 
     # Get dataloader
@@ -101,21 +101,20 @@ if __name__ == '__main__':
     torch.cuda.set_device(0)
     opt = opts().parse(
         [
-            '--exp_id', 'DETRAC_MOT20_KITTI',
+            '--exp_id', 'DETRAC_MOT20_KITTI_2',#updated dataset
             '--data_dir', 'kitti_tracking',
             '--data_cfg', 'src/lib/cfg/mot20_kitti_detrac.json',
-            # '--load_model', 'models/ctdet_coco_dla_2x.pth',
+            '--load_model', 'models/ctdet_coco_dla_2x.pth',
             # '--load_model', 'models/fairmot_dla34.pth',
-            '--load_model', 'exp/mot/DETRAC_MOT20_KITTI/model_10.pth',
+            # '--load_model', 'exp/mot/DETRAC_MOT20_KITTI/model_15.pth',
             '--num_classes', '8',
             # '--ltrb', False,
-            '--batch_size', '16',
+            '--batch_size', '4',
             '--track_buffer', '150',
-            '--dataset', 'kitti'
-            # '--lr', '5e-4'
-            '--lr', '3e-4',
+            '--dataset', 'kitti',
+            '--lr', '1e-4',
             '--lr_step', '5,10,15,20,25',
-            '--resume',
+            # '--resume',
     ])
     # train yolo
     # opt = opts().parse([
