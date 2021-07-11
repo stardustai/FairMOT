@@ -33,7 +33,7 @@ def create_model(arch, heads, head_conv):
   return model
 
 def load_model(model, model_path, optimizer=None, resume=False, 
-               lr=None, lr_step=None):
+               lr=None, lr_step=None, lr_decay=0.5):
   start_epoch = 0
   checkpoint = torch.load(model_path, map_location=lambda storage, loc: storage)
   print('loaded {}, epoch {}'.format(model_path, checkpoint['epoch']))
@@ -76,7 +76,7 @@ def load_model(model, model_path, optimizer=None, resume=False,
       start_lr = lr
       for step in lr_step:
         if start_epoch >= step:
-          start_lr *= 0.1
+          start_lr *= lr_decay
       for param_group in optimizer.param_groups:
         param_group['lr'] = start_lr
       print('Resumed optimizer with start lr', start_lr)

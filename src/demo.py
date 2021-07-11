@@ -28,8 +28,9 @@ class_ID = {
     'Cyclist': 3,
     'Tram': 4,
     'Misc': 5,
-    # 'DontCare': 6,
-    'Person': 3
+    'DontCare': 6,
+    'Person': 3,
+    'ignored': 7
 }
 ID_class = {v: k for k, v in class_ID.items()}
 
@@ -130,13 +131,12 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
     opt = opts().init(
         [
-            '--data_cfg', 'src/lib/cfg/kitti.json',
             # '--load_model', 'models/ctdet_coco_dla_2x.pth',
-            '--load_model', 'exp/mot/kitti_c6/model_last.pth',
-            '--input_video', 'videos/video.mp4',
+            '--load_model', 'exp/mot/DETRAC_MOT20_KITTI/model_10.pth',
+            '--input_video', 'videos/video_10s.mp4',
             '--output_root', 'output',
-            '--num_classes', '6',
-            '--ltrb', False,
+            '--num_classes', '8',
+            # '--ltrb', False,
             '--dataset', 'kitti'
     ])
     demo(opt)
