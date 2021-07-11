@@ -100,12 +100,13 @@ if __name__ == '__main__':
             '--exp_id', 'DETRAC_MOT20_KITTI',
             '--data_dir', 'kitti_tracking',
             '--data_cfg', 'src/lib/cfg/mot20_kitti_detrac.json',
-            '--load_model', 'models/ctdet_coco_dla_2x.pth',
+            # '--load_model', 'models/ctdet_coco_dla_2x.pth',
             '--num_classes', '8',
             # '--ltrb', False,
             '--batch_size', '4',
             '--track_buffer', '150',
-            # '--dataset', 'kitti'
+            '--resume',
+            '--dataset', 'kitti'
             # '--lr', '5e-4'
     ])
     # train yolo
