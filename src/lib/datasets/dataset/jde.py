@@ -375,7 +375,7 @@ class JointDataset(LoadImagesAndLabels):  # for training
             self.label_files[ds] = [
                 x.replace('images', 'labels_with_ids').replace('.png', '.txt').replace('.jpg', '.txt')
                 for x in self.img_files[ds]]
-
+        # get max tid in each dataset
         for ds, label_paths in self.label_files.items():
             max_index = -1
             for lp in label_paths:
@@ -389,15 +389,15 @@ class JointDataset(LoadImagesAndLabels):  # for training
                 if img_max > max_index:
                     max_index = img_max
             self.tid_num[ds] = max_index + 1
-
+        # calculate starting id for each dataset
         last_index = 0
         for i, (k, v) in enumerate(self.tid_num.items()):
             self.tid_start_index[k] = last_index
             last_index += v
-
-        self.nID = int(last_index + 1)
-        self.nds = [len(x) for x in self.img_files.values()]
-        self.cds = [sum(self.nds[:i]) for i in range(len(self.nds))]
+        
+        self.nID = int(last_index + 1)  # total tid number
+        self.nds = [len(x) for x in self.img_files.values()] # data size
+        self.cds = [sum(self.nds[:i]) for i in range(len(self.nds))] # starting data index
         self.nF = sum(self.nds)
         self.width = img_size[0]
         self.height = img_size[1]

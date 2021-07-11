@@ -24,14 +24,14 @@ def main(opt):
 
     print('Setting up data...')
     Dataset = get_dataset(opt.dataset, opt.task)
-    f = open(opt.data_cfg)
-    data_config = json.load(f)
-    trainset_paths = data_config['train']
-    dataset_root = data_config['root']
-    f.close()
+    with open(opt.data_cfg) as f:
+        data_config = json.load(f)
+        trainset_paths = data_config['train']
+        dataset_root = data_config['root']
+
     transforms = T.Compose([T.ToTensor()])
     dataset = Dataset(opt, dataset_root, trainset_paths, (1088, 608), augment=True, transforms=transforms)
-    opt = opts().update_dataset_info_and_set_heads(opt, dataset)
+    opt = opt.update_dataset_info_and_set_heads(opt, dataset)
     print(opt)
 
     logger = Logger(opt)
@@ -41,7 +41,7 @@ def main(opt):
 
     print('Creating model...')
     model = create_model(opt.arch, opt.heads, opt.head_conv)
-    optimizer = torch.optim.Adam(model.parameters(), opt.lr)
+    optimizer = torch.optim.AdamW(model.parameters(), opt.lr, weight_decay=0.01)
     start_epoch = 0
 
     # Get dataloader
@@ -83,7 +83,7 @@ def main(opt):
         if epoch in opt.lr_step:
             save_model(os.path.join(opt.save_dir, 'model_{}.pth'.format(epoch)),
                        epoch, model, optimizer)
-            lr = opt.lr * (0.1 ** (opt.lr_step.index(epoch) + 1))
+            lr = opt.lr * (opt.lr_decay ** (opt.lr_step.index(epoch) + 1))
             print('Drop LR to', lr)
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr
@@ -92,6 +92,10 @@ def main(opt):
                        epoch, model, optimizer)
     logger.close()
 
+'''
+DETRAC_MOT20_KITTI: ctdet_coco_dla_2x, batch=4, lr=1e-4
+DETRAC_MOT20_KITTI_fairmot: fairmot_dla34.pth, batch=16, lr=5e-4
+'''
 
 if __name__ == '__main__':
     torch.cuda.set_device(0)
@@ -101,13 +105,17 @@ if __name__ == '__main__':
             '--data_dir', 'kitti_tracking',
             '--data_cfg', 'src/lib/cfg/mot20_kitti_detrac.json',
             # '--load_model', 'models/ctdet_coco_dla_2x.pth',
+            # '--load_model', 'models/fairmot_dla34.pth',
+            '--load_model', 'exp/mot/DETRAC_MOT20_KITTI/model_10.pth',
             '--num_classes', '8',
             # '--ltrb', False,
-            '--batch_size', '4',
+            '--batch_size', '16',
             '--track_buffer', '150',
-            '--resume',
             '--dataset', 'kitti'
             # '--lr', '5e-4'
+            '--lr', '3e-4',
+            '--lr_step', '5,10,15,20,25',
+            '--resume',
     ])
     # train yolo
     # opt = opts().parse([

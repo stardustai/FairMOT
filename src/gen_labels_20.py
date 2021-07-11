@@ -35,19 +35,19 @@ Crowd 13
 '''
 fps=25
 MOT20_class_ID = {
-	1: 3,
-	2: 3,
-	3: 0,
-	4: 7,
-	5: 7,
-	6: 7,
-	7: 3,
-	8: -1,
-	9: -1,
-	10: -1,
-	11: -1,
-	12: -1,
-	13: 6
+	1: 3,  # Pedestrian
+	2: 3,  # Person on vehicle
+	3: 0,  # Car
+	4: 7,  # Bicycle
+	5: 7,  # Motorbike
+	6: 7,  # Non motorized vehicle
+	7: 3,  # Static person
+	8: -1,  # Distractor
+	9: -1,  # Occluder
+	10: -1,  # Occluder on the ground
+	11: -1,  # Occluder full
+	12: -1,  # Reflection
+	13: 6  # Crowd
 }
 MOT20_ID_class = {
 	3: 'Person',
@@ -88,6 +88,10 @@ def convert_mot_to_jde(seq_root, label_root):
 				continue
 			fid = int(fid)
 			tid = int(tid)
+			#keep tid unique in whole dataset, assuming tid monotonically increasing
+			if not tid == tid_last:
+				tid_curr += 1
+				tid_last = tid
 			x += w / 2
 			y += h / 2
 			label_fpath = osp.join(seq_label_root, '{:06d}.txt'.format(fid))
@@ -157,12 +161,12 @@ def render_video():
 			writer.write(img_arr)
 		writer.release()
 
-		# cmd_str = f'ffmpeg -y -i {temp_video} -c:v libx264 -preset fast -x264-params crf=25 -vf "crop=trunc(iw/2)*2:trunc(ih/2)*2" -r {fps} {output_video_path}'
-		# print(f'>>>Running ffmpeg with cmd: {cmd_str}')
-		# os.system(cmd_str)
-		# os.remove(temp_video)
+		cmd_str = f'ffmpeg -y -i {temp_video} -c:v libx264 -preset fast -x264-params crf=25 -vf "crop=trunc(iw/2)*2:trunc(ih/2)*2" -r {fps} {output_video_path}'
+		print(f'>>>Running ffmpeg with cmd: {cmd_str}')
+		os.system(cmd_str)
+		os.remove(temp_video)
 
 if __name__ == '__main__':
-	# convert_mot_to_jde(ori_img_path, target_txt)
-	# gen_train_val()
+	convert_mot_to_jde(ori_img_path, target_txt)
+	gen_train_val()
 	render_video()
